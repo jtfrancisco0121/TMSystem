@@ -1,0 +1,41 @@
+{
+  "name": "inventory-invoice",
+  "version": "0.1.0",
+  "description": "Inventory + Invoice desktop app (Electron + Vite + React + TypeScript)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "cd renderer && npm run dev",
+    "dev:electron": "wait-on http://localhost:5173 && ELECTRON_START_URL=http://localhost:5173 electron .",
+    "build": "cd renderer && npm run build",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "electron-updater": "^5.3.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "wait-on": "^7.0.1",
+    "electron": "^25.0.0",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "appId": "com.example.inventory-invoice",
+    "productName": "InventoryInvoice",
+    "directories": {
+      "buildResources": "build",
+      "output": "dist_electron"
+    },
+    "files": ["**/*"],
+    "mac": { "target": ["dmg"] },
+    "win": { "target": ["nsis"] },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "jtfrancisco0121",
+        "repo": "TMSystem"
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+import React, { useMemo, useState } from 'react'
+import ProductModal from './ProductModal'
+
+type Prod = { sku:string, name:string, category:string, stock:number, price:number }
+
+const sample: Prod[] = [
+  { sku: 'P001', name: 'Widget A', category: 'Gadgets', stock: 120, price: 9.99 },
+  { sku: 'P002', name: 'Widget B', category: 'Gadgets', stock: 45, price: 14.5 },
+  { sku: 'P003', name: 'Gizmo', category: 'Tools', stock: 200, price: 5.25 }
+]
+
+export default function Inventory(){
+  const [products, setProducts] = useState<Prod[]>(sample)
+  const [q, setQ] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number|null>(null)
+
+  const filtered = useMemo(()=>{
+    const s = q.trim().toLowerCase()
+    if(!s) return products
+    return products.filter(p => p.sku.toLowerCase().includes(s) || p.name.toLowerCase().includes(s) )
+  },[q, products])
+
+  function openAdd(){ setEditingIndex(null); setModalOpen(true) }
+  function openEdit(i:number){ setEditingIndex(i); setModalOpen(true) }
+  function saveProduct(p:Prod){
+    if(editingIndex===null) setProducts(s=>[p,...s])
+    else setProducts(s => s.map((it,idx)=> idx===editingIndex? p: it))
+  }
+  function deleteProduct(i:number){ if(!confirm('Delete?')) return; setProducts(s=>s.filter((_,idx)=>idx!==i)) }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">Products</h3>
+        <div className="flex items-center gap-2">
+          <input className="px-3 py-2 border rounded-md text-sm" placeholder="Search SKU or name" value={q} onChange={e=>setQ(e.target.value)} />
+          <button onClick={openAdd} className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Add Product</button>
+        </div>
+      </div>
+
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stock</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Unit Price</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {filtered.map((p,i)=> (
+              <tr key={p.sku+i} className={i%2===0? 'bg-white':'bg-gray-50'}>
+                <td className="px-4 py-3 text-sm text-gray-700">{p.sku}</td>
+                <td className="px-4 py-3 text-sm text-gray-700">{p.name}</td>
+                <td className="px-4 py-3 text-sm text-gray-500">{p.category}</td>
+                <td className="px-4 py-3 text-sm text-gray-700 text-right">{p.stock}</td>
+                <td className="px-4 py-3 text-sm text-gray-700 text-right">{p.price.toFixed(2)}</td>
+                <td className="px-4 py-3 text-sm text-right space-x-2">
+                  <button onClick={()=> openEdit(products.indexOf(p))} className="px-2 py-1 bg-yellow-400 text-white rounded-md hover:bg-yellow-500">Edit</button>
+                  <button onClick={()=> deleteProduct(products.indexOf(p))} className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">Delete</button>
+                </td>
+              </tr>
+            ))}
+            {filtered.length===0 && (
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">No products</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <ProductModal open={modalOpen} onClose={()=>setModalOpen(false)} onSave={saveProduct} initial={editingIndex!==null? products[editingIndex]: null} />
+    </div>
+  )
+}

@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* small custom styles for modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:60}
+.modal{background:white;padding:16px;border-radius:8px;min-width:320px;max-width:900px;box-shadow:0 8px 24px rgba(0,0,0,0.15)}

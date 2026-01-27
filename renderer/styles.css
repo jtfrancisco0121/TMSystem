@@ -1,0 +1,9 @@
+
+/* minimal custom styles; Tailwind handles layout */
+html,body,#root{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:60}
+.modal{background:white;padding:16px;border-radius:8px;min-width:320px;max-width:900px;box-shadow:0 8px 24px rgba(0,0,0,0.15)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+.form-grid label{display:flex;flex-direction:column;font-size:13px}
+.form-grid input{padding:8px;border-radius:6px;border:1px solid #e5e7eb}
+
