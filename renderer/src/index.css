@@ -5,3 +5,44 @@
 /* small custom styles for modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:60}
 .modal{background:white;padding:16px;border-radius:8px;min-width:320px;max-width:900px;box-shadow:0 8px 24px rgba(0,0,0,0.15)}
+
+/* Print styles for invoice preview */
+@media print {
+	@page { size: A4 portrait; margin: 10mm; }
+
+	/* Base font sizing for print */
+	html, body { font-size: 12pt; color: #000; }
+
+	/* Hide everything by default, then reveal the printable invoice container */
+	body * { visibility: hidden !important; }
+	.printable-invoice, .printable-invoice * { visibility: visible !important; }
+
+	/* Make printable container flow naturally on the printed page */
+	.printable-invoice {
+		position: static !important;
+		top: auto !important;
+		left: auto !important;
+		width: 100% !important;
+		max-width: none !important;
+		max-height: none !important;
+		overflow: visible !important;
+		box-shadow: none !important;
+		background: #fff !important;
+		padding: 0 !important;
+	}
+
+	/* Hide UI elements that are not part of the invoice */
+	button, .no-print, .modal-backdrop { display: none !important; }
+
+	/* Table print behaviour: avoid breaking rows across pages */
+	.printable-invoice table { width: 100%; border-collapse: collapse; }
+	.printable-invoice thead { display: table-header-group; }
+	.printable-invoice tfoot { display: table-footer-group; }
+	.printable-invoice tr { page-break-inside: avoid; break-inside: avoid; }
+
+	/* Totals section should be clear and appear after table */
+	.printable-invoice .totals { display: block; margin-top: 12px; }
+
+	/* Ensure consistent font sizes and spacing */
+	.printable-invoice { font-size: 12pt; line-height: 1.2; }
+}

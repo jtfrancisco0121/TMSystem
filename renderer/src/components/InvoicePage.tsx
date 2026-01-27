@@ -120,7 +120,7 @@ export default function InvoicePage(){
       {preview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={()=>setPreview(null)}></div>
-          <div className="relative bg-white w-[90%] max-w-3xl rounded-lg shadow-lg p-6 overflow-auto max-h-[90%]">
+          <div className="relative bg-white w-[90%] max-w-3xl rounded-lg shadow-lg p-6 overflow-auto max-h-[90%] printable-invoice">
             <div className="flex justify-between items-start">
               <h3 className="text-lg font-semibold">Invoice Preview</h3>
               <button onClick={()=>setPreview(null)} className="text-gray-500 hover:text-gray-700">Close</button>
