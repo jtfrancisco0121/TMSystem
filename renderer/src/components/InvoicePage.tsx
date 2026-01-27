@@ -28,12 +28,10 @@ export default function InvoicePage(){
 
   function computeTotals(){
     const subtotal = items.reduce((s,it)=> s + (parseFloat(String(it.total))||0), 0)
-    const ewTaxRate = 0.12
-    const vatRate = 0.12
-    const ewTax = +(subtotal * ewTaxRate)
-    const withoutVAT = +(subtotal - ewTax)
-    const withVAT = +(withoutVAT * vatRate)
-    const grandTotal = +(withoutVAT + withVAT)
+    const ewTax = +(subtotal * 0.12)
+    const withVAT = +(subtotal + ewTax)
+    const withoutVAT = +(subtotal / 1.12)
+    const grandTotal = withVAT
     setTotals({ subtotal, ewTax, withoutVAT, withVAT, grandTotal })
   }
 
@@ -120,13 +118,60 @@ export default function InvoicePage(){
       </div>
 
       {preview && (
-        <div>
-          <div className="modal-backdrop" onClick={()=>setPreview(null)}>
-            <div className="modal">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={()=>setPreview(null)}></div>
+          <div className="relative bg-white w-[90%] max-w-3xl rounded-lg shadow-lg p-6 overflow-auto max-h-[90%]">
+            <div className="flex justify-between items-start">
               <h3 className="text-lg font-semibold">Invoice Preview</h3>
-              <div className="mt-2"><strong>{preview.header.customer}</strong> — {preview.header.address}</div>
-              <div className="mt-2 text-sm">Subtotal: {preview.totals.subtotal.toFixed(2)}</div>
-              <div className="mt-2 text-right"><button onClick={()=>{ console.log('Print', preview); window.print() }} className="px-3 py-2 bg-indigo-600 text-white rounded">Print</button></div>
+              <button onClick={()=>setPreview(null)} className="text-gray-500 hover:text-gray-700">Close</button>
+            </div>
+            <div className="mt-4">
+              <div className="flex justify-between">
+                <div>
+                  <div className="font-semibold">{preview.header.customer}</div>
+                  <div className="text-sm text-gray-600">{preview.header.address}</div>
+                  <div className="text-sm text-gray-600">TIN: {preview.header.tin}</div>
+                </div>
+                <div className="text-sm text-gray-600">Date: {preview.header.date}</div>
+              </div>
+
+              <table className="w-full mt-4 text-sm border-collapse">
+                <thead>
+                  <tr className="text-left">
+                    <th className="pb-2">Qty</th>
+                    <th className="pb-2">Unit</th>
+                    <th className="pb-2">Description</th>
+                    <th className="pb-2 text-right">Unit Price</th>
+                    <th className="pb-2 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {preview.items.map((it:any, idx:number)=> (
+                    <tr key={idx} className="border-t">
+                      <td className="py-2 align-top">{it.qty}</td>
+                      <td className="py-2 align-top">{it.unit}</td>
+                      <td className="py-2 align-top">{it.desc}</td>
+                      <td className="py-2 text-right align-top">{(parseFloat(String(it.price))||0).toFixed(2)}</td>
+                      <td className="py-2 text-right align-top">{(parseFloat(String(it.total))||0).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="mt-4 w-full flex justify-end">
+                <div className="w-full md:w-1/3">
+                  <div className="flex justify-between py-1"><div className="text-sm text-gray-600">Subtotal</div><div className="font-medium">{preview.totals.subtotal.toFixed(2)}</div></div>
+                  <div className="flex justify-between py-1"><div className="text-sm text-gray-600">EW Tax (12%)</div><div className="font-medium">{preview.totals.ewTax.toFixed(2)}</div></div>
+                  <div className="flex justify-between py-1"><div className="text-sm text-gray-600">Without VAT</div><div className="font-medium">{preview.totals.withoutVAT.toFixed(2)}</div></div>
+                  <div className="flex justify-between py-1"><div className="text-sm text-gray-600">With VAT</div><div className="font-medium">{preview.totals.withVAT.toFixed(2)}</div></div>
+                  <div className="flex justify-between py-2 border-t mt-2"><div className="text-lg font-semibold">Grand Total</div><div className="text-lg font-bold">{preview.totals.grandTotal.toFixed(2)}</div></div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex justify-end gap-2">
+                <button onClick={()=>window.print()} className="px-3 py-2 bg-indigo-600 text-white rounded">Print</button>
+                <button onClick={()=>setPreview(null)} className="px-3 py-2 bg-gray-200 text-gray-700 rounded">Close</button>
+              </div>
             </div>
           </div>
         </div>
