@@ -1,0 +1,12 @@
+node_modules/
+.env
+dist/
+build/
+out/
+*.log
+/*.local
+.DS_Store
+.cache/
+renderer/node_modules/
+dist-electron/
+/*.tgz
