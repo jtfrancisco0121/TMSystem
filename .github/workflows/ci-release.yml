@@ -48,5 +48,12 @@ jobs:
         run: |
           npx electron-builder --win --x64 --publish always
 
-      - name: Show produced artifacts (for debugging)
+      - name: Show produced artifacts (macOS)
+        if: matrix.os == 'macos-latest'
         run: ls -la dist || true
+
+      - name: Show produced artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          if (Test-Path dist) { Get-ChildItem -Path dist -Recurse | Format-List } else { Write-Host 'dist not found' }
