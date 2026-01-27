@@ -8,8 +8,8 @@
     "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:electron\"",
     "dev:renderer": "cd renderer && npm run dev",
     "dev:electron": "wait-on http://localhost:5173 && ELECTRON_START_URL=http://localhost:5173 electron .",
-    "build": "cd renderer && npm run build",
-    "dist": "electron-builder"
+    "build": "cd renderer && npm ci && npm run build",
+    "dist": "npm run build && electron-builder --publish=never"
   },
   "dependencies": {
     "electron-updater": "^5.3.0"

@@ -1,0 +1,80 @@
+name: Release on Tag
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build artifacts (matrix)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Build renderer
+        run: |
+          cd renderer
+          npm ci
+          npm run build
+
+      - name: Package Electron app
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            npx electron-builder --mac --publish=never
+          else
+            npx electron-builder --win --x64 --publish=never
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-${{ matrix.os }}
+          path: dist_electron/**
+
+  release:
+    name: Create GitHub Release and upload artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download mac artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact-macos-latest
+          path: ./artifacts/macos || true
+
+      - name: Download windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact-windows-latest
+          path: ./artifacts/windows || true
+
+      - name: List downloaded artifacts
+        run: ls -la ./artifacts || true
+
+      - name: Create Release and upload assets
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          files: |
+            ./artifacts/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
