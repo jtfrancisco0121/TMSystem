@@ -5,6 +5,7 @@ export default function Sidebar({ onNavigate, active }: { onNavigate: (r:string)
     ['dashboard','Dashboard'],
     ['inventory','Inventory'],
     ['invoices','Invoices'],
+    ['receipts','Receipts'],
     ['reports','Reports'],
     ['settings','Settings']
   ] as [string,string][]

@@ -4,11 +4,12 @@ import Header from './Header'
 import Dashboard from './Dashboard'
 import Inventory from './Inventory'
 import InvoicePage from './InvoicePage'
+import CollectionReceipt from './CollectionReceipt'
 import Reports from './Reports'
 import Settings from './Settings'
 
 export default function App(){
-  const [route, setRoute] = useState<'dashboard'|'inventory'|'invoices'|'reports'|'settings'>('dashboard')
+  const [route, setRoute] = useState<'dashboard'|'inventory'|'invoices'|'receipts'|'reports'|'settings'>('dashboard')
   const [updateState, setUpdateState] = useState<{status: string, info?: any} | null>(null)
 
   React.useEffect(() => {
@@ -51,6 +52,7 @@ export default function App(){
             {route === 'dashboard' && <Dashboard />}
             {route === 'inventory' && <Inventory />}
             {route === 'invoices' && <InvoicePage />}
+            {route === 'receipts' && <CollectionReceipt />}
             {route === 'reports' && <Reports />}
             {route === 'settings' && <Settings />}
           </div>
