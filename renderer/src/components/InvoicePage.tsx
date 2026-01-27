@@ -8,7 +8,9 @@ export default function InvoicePage(){
 
   const [header, setHeader] = useState(emptyHeader)
   const [items, setItems] = useState<Item[]>(emptyItems)
-  const [savedInvoices, setSavedInvoices] = useState<any[]>([])
+  const [savedInvoices, setSavedInvoices] = useState<any[]>(() => {
+    try { const raw = localStorage.getItem('savedInvoices'); return raw ? JSON.parse(raw) : [] } catch { return [] }
+  })
   const [preview, setPreview] = useState<any|null>(null)
   const [totals, setTotals] = useState({ subtotal:0, ewTax:0, withoutVAT:0, withVAT:0, grandTotal:0 })
 
@@ -37,11 +39,16 @@ export default function InvoicePage(){
 
   function saveInvoice(){
     const payload = { id:Date.now(), header, items, totals }
-    setSavedInvoices(s=>[payload,...s])
+    setSavedInvoices(s=>{
+      const next = [payload,...s]
+      try{ localStorage.setItem('savedInvoices', JSON.stringify(next)) }catch{}
+      return next
+    })
     alert('Saved invoice to local state')
   }
 
-  function printInvoice(){ setPreview({ header, items, totals }) }
+  function openPreview(){ setPreview({ header, items, totals }) }
+  function printInvoice(){ window.print() }
   function clearForm(){ if(!confirm('Clear form?')) return; setHeader(emptyHeader); setItems(emptyItems) }
 
   return (
@@ -49,8 +56,9 @@ export default function InvoicePage(){
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Invoice</h3>
         <div className="flex items-center gap-2">
-          <button onClick={saveInvoice} className="px-3 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">Save</button>
-          <button onClick={printInvoice} className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Print</button>
+          <button onClick={saveInvoice} className="px-3 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">Save Invoice</button>
+          <button onClick={openPreview} className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Preview</button>
+          <button onClick={printInvoice} className="px-3 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700">Print</button>
           <button onClick={clearForm} className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Clear</button>
         </div>
       </div>
