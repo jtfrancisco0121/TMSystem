@@ -9,7 +9,7 @@ import Reports from './Reports'
 import Settings from './Settings'
 
 export default function App(){
-  const [route, setRoute] = useState<'dashboard'|'inventory'|'invoices'|'receipts'|'reports'|'settings'>('dashboard')
+  const [route, setRoute] = useState<'dashboard' | 'inventory' | 'invoices' | 'receipts' | 'reports' | 'settings'>('dashboard')
   const [updateState, setUpdateState] = useState<{status: string, info?: any} | null>(null)
 
   React.useEffect(() => {

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function Sidebar({ onNavigate, active }: { onNavigate: (r:string)=>void, active:string }){
+export default function Sidebar({ onNavigate, active }: { onNavigate: (r: any) => void, active: string }){
   const links = [
     ['dashboard','Dashboard'],
     ['inventory','Inventory'],

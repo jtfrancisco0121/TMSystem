@@ -2,8 +2,8 @@ name: Build & Release
 
 on:
   push:
-    branches: [ main ]
-    tags: ['*']
+    branches: [main]
+    tags: ["*"]
 
 permissions:
   contents: write
@@ -22,8 +22,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Install root dependencies
         run: npm ci

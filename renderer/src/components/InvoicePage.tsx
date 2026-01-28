@@ -1,53 +1,15 @@
-import React, { useEffect, useState } from 'react'
-
-type Item = { qty:string|number, unit:string, desc:string, price:string|number, total:number }
+import React from 'react'
+import { useFinancials } from '../hooks/useFinancials'
+import { useInventory } from '../hooks/useInventory'
 
 export default function InvoicePage(){
+  const { products, updateStock, setInventory } = useInventory()
   const emptyHeader = { date: new Date().toISOString().slice(0,10), customer:'', address:'', tin:'' }
-  const emptyItems: Item[] = Array.from({length:15}).map(()=>({ qty:'', unit:'', desc:'', price:'', total:0 }))
+  const { header, setHeader, items, updateItem, totals, saveRecord, preview, setPreview, openPreview, clear } = useFinancials<typeof emptyHeader>(emptyHeader, 'savedInvoices')
 
-  const [header, setHeader] = useState(emptyHeader)
-  const [items, setItems] = useState<Item[]>(emptyItems)
-  const [savedInvoices, setSavedInvoices] = useState<any[]>(() => {
-    try { const raw = localStorage.getItem('savedInvoices'); return raw ? JSON.parse(raw) : [] } catch { return [] }
-  })
-  const [preview, setPreview] = useState<any|null>(null)
-  const [totals, setTotals] = useState({ subtotal:0, ewTax:0, withoutVAT:0, withVAT:0, grandTotal:0 })
-
-  useEffect(()=> computeTotals(), [items])
-
-  function updateItem(i:number, field:string, value:any){
-    const next = [...items]
-    // @ts-ignore
-    next[i] = { ...next[i], [field]: value }
-    const qty = parseFloat(String(next[i].qty)) || 0
-    const price = parseFloat(String(next[i].price)) || 0
-    next[i].total = +(qty * price)
-    setItems(next)
-  }
-
-  function computeTotals(){
-    const subtotal = items.reduce((s,it)=> s + (parseFloat(String(it.total))||0), 0)
-    const ewTax = +(subtotal * 0.12)
-    const withVAT = +(subtotal + ewTax)
-    const withoutVAT = +(subtotal / 1.12)
-    const grandTotal = withVAT
-    setTotals({ subtotal, ewTax, withoutVAT, withVAT, grandTotal })
-  }
-
-  function saveInvoice(){
-    const payload = { id:Date.now(), header, items, totals }
-    setSavedInvoices(s=>{
-      const next = [payload,...s]
-      try{ localStorage.setItem('savedInvoices', JSON.stringify(next)) }catch{}
-      return next
-    })
-    alert('Saved invoice to local state')
-  }
-
-  function openPreview(){ setPreview({ header, items, totals }) }
+  function saveInvoice(){ saveRecord(); alert('Saved invoice to local state') }
   function printInvoice(){ window.print() }
-  function clearForm(){ if(!confirm('Clear form?')) return; setHeader(emptyHeader); setItems(emptyItems) }
+  function clearForm(){ if(!confirm('Clear form?')) return; clear() }
 
   return (
     <div>
@@ -60,32 +22,11 @@ export default function InvoicePage(){
           <button onClick={clearForm} className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Clear</button>
         </div>
       </div>
-
-      <div className="bg-white shadow rounded-lg p-4 mb-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm text-gray-600">Date</label>
-            <input className="mt-1 w-full px-3 py-2 border rounded-md" type="date" value={header.date} onChange={e=>setHeader(h=>({...h, date:e.target.value}))} />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-600">Customer Name</label>
-            <input className="mt-1 w-full px-3 py-2 border rounded-md" value={header.customer} onChange={e=>setHeader(h=>({...h, customer:e.target.value}))} />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-600">Address</label>
-            <input className="mt-1 w-full px-3 py-2 border rounded-md" value={header.address} onChange={e=>setHeader(h=>({...h, address:e.target.value}))} />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-600">TIN</label>
-            <input className="mt-1 w-full px-3 py-2 border rounded-md" value={header.tin} onChange={e=>setHeader(h=>({...h, tin:e.target.value}))} />
-          </div>
-        </div>
-      </div>
-
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit</th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
@@ -94,15 +35,66 @@ export default function InvoicePage(){
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
-            {items.map((it,i)=> (
-              <tr key={i} className={i%2===0? 'bg-white':'bg-gray-50'}>
-                <td className="px-3 py-2 w-24"><input className="w-full px-2 py-1 border rounded-md text-sm" type="number" value={String(it.qty)} onChange={e=>updateItem(i,'qty', e.target.value)} /></td>
-                <td className="px-3 py-2 w-24"><input className="w-full px-2 py-1 border rounded-md text-sm" value={it.unit} onChange={e=>updateItem(i,'unit', e.target.value)} /></td>
-                <td className="px-3 py-2"><input className="w-full px-2 py-1 border rounded-md text-sm" value={it.desc} onChange={e=>updateItem(i,'desc', e.target.value)} /></td>
-                <td className="px-3 py-2 w-32 text-right"><input className="w-full px-2 py-1 border rounded-md text-sm text-right" type="number" step="0.01" value={String(it.price)} onChange={e=>updateItem(i,'price', e.target.value)} /></td>
-                <td className="px-3 py-2 w-32 text-right text-sm font-medium">{(it.total||0).toFixed(2)}</td>
-              </tr>
-            ))}
+            {items.map((it,i)=> {
+              // Get selected SKUs in other rows to prevent duplicates
+              const selectedSKUs = items.map(row => row.sku).filter((sku, idx) => sku && idx !== i)
+              return (
+                <tr key={i} className={i%2===0? 'bg-white':'bg-gray-50'}>
+                  <td className="px-3 py-2 w-40">
+                    <select
+                      className="w-full px-2 py-1 border rounded-md text-sm"
+                      value={it.sku || ''}
+                      onChange={e => {
+                        const sku = e.target.value
+                        const prod = products.find(p => p.sku === sku)
+                        if (prod) {
+                          updateItem(i, 'sku', prod.sku)
+                          updateItem(i, 'desc', prod.name)
+                          updateItem(i, 'unit', prod.category)
+                          updateItem(i, 'price', prod.price)
+                        }
+                      }}
+                    >
+                      <option value="">Select product</option>
+                      {products.filter(p => !selectedSKUs.includes(p.sku)).map(prod => (
+                        <option key={prod.sku} value={prod.sku}>{prod.name} ({prod.sku})</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-3 py-2 w-24">
+                    <input
+                      className="w-full px-2 py-1 border rounded-md text-sm"
+                      type="number"
+                      min={1}
+                      max={(() => {
+                        const prod = products.find(p => p.sku === it.sku)
+                        return prod ? prod.stock : 9999
+                      })()}
+                      value={String(it.qty)}
+                      onChange={e => {
+                        const prod = products.find(p => p.sku === it.sku)
+                        const qty = Number(e.target.value)
+                        if (prod && qty > prod.stock) {
+                          alert('Quantity exceeds available stock!')
+                          return
+                        }
+                        updateItem(i, 'qty', qty)
+                      }}
+                    />
+                  </td>
+                  <td className="px-3 py-2 w-24">
+                    <input className="w-full px-2 py-1 border rounded-md text-sm" value={it.unit || ''} onChange={e=>updateItem(i,'unit', e.target.value)} />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input className="w-full px-2 py-1 border rounded-md text-sm" value={it.desc || ''} onChange={e=>updateItem(i,'desc', e.target.value)} />
+                  </td>
+                  <td className="px-3 py-2 w-32 text-right">
+                    <input className="w-full px-2 py-1 border rounded-md text-sm text-right" type="number" step="0.01" value={String(it.price || '')} onChange={e=>updateItem(i,'price', e.target.value)} />
+                  </td>
+                  <td className="px-3 py-2 w-32 text-right text-sm font-medium">{(it.total||0).toFixed(2)}</td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

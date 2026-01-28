@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react'
 
-export type Item = { qty: string|number, unit: string, desc: string, price: string|number, total: number }
+export type Item = { sku?: string, qty: string|number, unit: string, desc: string, price: string|number, total: number }
 
 export function createEmptyItems(count = 15): Item[] {
-  return Array.from({ length: count }).map(() => ({ qty: '', unit: '', desc: '', price: '', total: 0 }))
+  return Array.from({ length: count }).map(() => ({ sku: '', qty: '', unit: '', desc: '', price: '', total: 0 }))
 }
 
-export function useFinancials<THeader extends Record<string, any>>(initialHeader: THeader, storageKey = 'records'){
+export function useFinancials<THeader extends Record<string, any>>(initialHeader: THeader, storageKey = 'records') {
   const [header, setHeader] = useState<THeader>(initialHeader)
   const [items, setItems] = useState<Item[]>(() => createEmptyItems())
   const [totals, setTotals] = useState({ subtotal:0, ewTax:0, withoutVAT:0, withVAT:0, grandTotal:0 })
   const [savedRecords, setSavedRecords] = useState<any[]>(() => {
-    try { const raw = localStorage.getItem(storageKey); return raw ? JSON.parse(raw) : [] } catch { return [] }
+    try { 
+      const raw = localStorage.getItem(storageKey); 
+      return raw ? JSON.parse(raw) : [] 
+    } catch { 
+      return [] 
+    }
   })
   const [preview, setPreview] = useState<any|null>(null)
 
@@ -45,9 +50,14 @@ export function useFinancials<THeader extends Record<string, any>>(initialHeader
     })
   }
 
-  function clear(){ setHeader(initialHeader); setItems(createEmptyItems()) }
+  function clear(){ 
+    setHeader(initialHeader); 
+    setItems(createEmptyItems()) 
+  }
 
-  function openPreview(){ setPreview({ header, items, totals }) }
+  function openPreview(){ 
+    setPreview({ header, items, totals }) 
+  }
 
   return {
     header, setHeader,
